@@ -94,8 +94,7 @@
   background: linear-gradient(135deg, #526f69, #172623);
 }
 
-.mobile-details-toggle,
-.mobile-collection-toggle {
+.mobile-details-toggle {
   display: none;
 }
 
@@ -255,8 +254,7 @@
     margin: 14px 0;
   }
 
-  .mobile-details-toggle,
-  .mobile-collection-toggle {
+  .mobile-details-toggle {
     display: flex;
     width: 100%;
     min-height: 42px;
@@ -274,23 +272,11 @@
     margin-top: 14px;
   }
 
-  .mobile-collection-toggle {
-    margin-top: 16px;
-    border-radius: 999px;
-    background: var(--ink);
-    color: #fff;
-  }
-
   .house-card.mobile-collapsed .compare-line,
   .house-card.mobile-collapsed .card-body > p:not(.address),
   .house-card.mobile-collapsed .chips,
   .activity-card.mobile-collapsed .card-body > p:not(.address),
   .food-card.mobile-collapsed .card-body > p:not(.address) {
-    display: none;
-  }
-
-  .activity-grid:not(.mobile-expanded):not(.mobile-filtered) .activity-card.mobile-hidden-card,
-  .food-grid:not(.mobile-expanded) .food-card.mobile-hidden-card {
     display: none;
   }
 
@@ -433,6 +419,7 @@
   };
 
   const bindMobileDetails = (card) => {
+    if (card.querySelector(".mobile-details-toggle")) return;
     card.classList.add("mobile-collapsed");
     const button = document.createElement("button");
     button.type = "button";
@@ -446,23 +433,6 @@
       button.textContent = collapsed ? "Подробнее" : "Свернуть";
       button.setAttribute("aria-expanded", String(!collapsed));
     });
-  };
-
-  const bindMobileCollection = (grid, cards, visibleCount, label) => {
-    cards.forEach((card, index) => card.classList.toggle("mobile-hidden-card", index >= visibleCount));
-    if (cards.length <= visibleCount) return null;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "mobile-collection-toggle";
-    button.textContent = `Показать все ${label}`;
-    button.setAttribute("aria-expanded", "false");
-    grid.insertAdjacentElement("afterend", button);
-    button.addEventListener("click", () => {
-      const expanded = grid.classList.toggle("mobile-expanded");
-      button.textContent = expanded ? "Свернуть подборку" : `Показать все ${label}`;
-      button.setAttribute("aria-expanded", String(expanded));
-    });
-    return button;
   };
 
   document.querySelectorAll(".house-card").forEach((card, index) => {
@@ -512,13 +482,6 @@
     bindMobileDetails(card);
   });
 
-  const activityGrid = document.querySelector(".activity-grid");
-  const foodGrid = document.querySelector(".food-grid");
-  const activityCollectionButton = activityGrid
-    ? bindMobileCollection(activityGrid, activityCards, 6, "активности")
-    : null;
-  if (foodGrid) bindMobileCollection(foodGrid, foodCards, 4, "рестораны");
-
   const mikhail = document.querySelectorAll(".mikhail-card");
   if (mikhail[0]) bindDecision(mikhail[0], "mikhail:one");
   if (mikhail[1]) bindDecision(mikhail[1], "mikhail:three");
@@ -531,8 +494,6 @@
       document.querySelectorAll(".activity-card").forEach((card) => {
         card.hidden = !(filter === "all" || (filter === "mine" ? card.dataset.own === "true" : card.dataset.category === filter));
       });
-      activityGrid?.classList.toggle("mobile-filtered", filter !== "all");
-      if (activityCollectionButton) activityCollectionButton.hidden = filter !== "all";
     });
   });
 
