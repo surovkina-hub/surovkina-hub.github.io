@@ -94,8 +94,78 @@
   background: linear-gradient(135deg, #526f69, #172623);
 }
 
-.mobile-details-toggle {
-  display: none;
+.collapsible-section.accordion-direct > .section-title,
+.collapsible-section.accordion-nested .accordion-container > .section-title {
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.collapsible-section.accordion-direct > .section-title:hover,
+.collapsible-section.accordion-nested .accordion-container > .section-title:hover {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.collapsible-section .section-toggle {
+  flex: 0 0 auto;
+  min-width: 138px;
+  min-height: 44px;
+  margin-left: auto;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.collapsible-section .section-toggle span {
+  display: inline-block;
+  margin-left: 7px;
+  font-size: 17px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.collapsible-section:not(.section-collapsed) .section-toggle span {
+  transform: rotate(45deg);
+}
+
+.collapsible-section.section-collapsed {
+  padding-block: 18px !important;
+}
+
+.collapsible-section.section-collapsed.accordion-direct > .section-title,
+.collapsible-section.section-collapsed.accordion-nested .accordion-container > .section-title {
+  margin-bottom: 0;
+}
+
+.collapsible-section.section-collapsed.accordion-direct > :not(.section-title),
+.collapsible-section.section-collapsed.accordion-nested .accordion-container > :not(.section-title) {
+  display: none !important;
+}
+
+.romance.collapsible-section .accordion-container > .section-title,
+.checklist-section.collapsible-section .accordion-container > .section-title {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.romance.collapsible-section .accordion-container > .section-title:hover,
+.checklist-section.collapsible-section .accordion-container > .section-title:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.romance.collapsible-section .section-toggle,
+.checklist-section.collapsible-section .section-toggle {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: #fff;
+  color: var(--ink);
 }
 
 @media (max-width: 980px) and (min-width: 681px) {
@@ -254,30 +324,43 @@
     margin: 14px 0;
   }
 
-  .mobile-details-toggle {
-    display: flex;
-    width: 100%;
-    min-height: 42px;
+  .collapsible-section.accordion-direct > .section-title,
+  .collapsible-section.accordion-nested .accordion-container > .section-title {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px 12px;
     align-items: center;
-    justify-content: center;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #f7f3ed;
-    color: var(--ink);
-    font-size: 12px;
-    font-weight: 750;
+    padding: 15px 16px;
   }
 
-  .mobile-details-toggle {
-    margin-top: 14px;
+  .collapsible-section .section-title > div:first-child {
+    min-width: 0;
   }
 
-  .house-card.mobile-collapsed .compare-line,
-  .house-card.mobile-collapsed .card-body > p:not(.address),
-  .house-card.mobile-collapsed .chips,
-  .activity-card.mobile-collapsed .card-body > p:not(.address),
-  .food-card.mobile-collapsed .card-body > p:not(.address) {
-    display: none;
+  .collapsible-section .section-title h2 {
+    font-size: clamp(29px, 8.8vw, 36px);
+  }
+
+  .collapsible-section .section-title .section-note {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 0;
+  }
+
+  .collapsible-section .section-toggle {
+    grid-column: 2;
+    grid-row: 1;
+    min-width: 48px;
+    width: 48px;
+    min-height: 48px;
+    margin: 0;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .collapsible-section .section-toggle span {
+    margin: 0;
+    font-size: 22px;
   }
 
   .activity-card > img,
@@ -418,23 +501,6 @@
     });
   };
 
-  const bindMobileDetails = (card) => {
-    if (card.querySelector(".mobile-details-toggle")) return;
-    card.classList.add("mobile-collapsed");
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "mobile-details-toggle";
-    button.textContent = "Подробнее";
-    button.setAttribute("aria-expanded", "false");
-    const decision = card.querySelector(".decision");
-    decision?.before(button);
-    button.addEventListener("click", () => {
-      const collapsed = card.classList.toggle("mobile-collapsed");
-      button.textContent = collapsed ? "Подробнее" : "Свернуть";
-      button.setAttribute("aria-expanded", String(!collapsed));
-    });
-  };
-
   document.querySelectorAll(".house-card").forEach((card, index) => {
     const item = data.houses[index];
     if (!item) return;
@@ -459,7 +525,6 @@
       state.primaryHouse = state.primaryHouse === item.id ? "" : item.id;
       save(); updateDecisionUI();
     });
-    bindMobileDetails(card);
   });
 
   const activityCards = [...document.querySelectorAll(".activity-card")];
@@ -470,7 +535,6 @@
     card.dataset.category = item.category;
     card.dataset.own = item.own ? "true" : "false";
     bindDecision(card, `activity:${item.id}`);
-    bindMobileDetails(card);
   });
 
   const foodCards = [...document.querySelectorAll(".food-card")];
@@ -479,8 +543,56 @@
     if (!item) return;
     card.dataset.itemId = item.id;
     bindDecision(card, `food:${item.id}`);
-    bindMobileDetails(card);
   });
+
+  const initSectionAccordions = () => {
+    const ids = ["home", "romance", "map", "activities", "food", "mikhail", "calendar", "checklist"];
+    const controls = new Map();
+    ids.forEach((id) => {
+      const section = document.getElementById(id);
+      if (!section || section.dataset.accordionReady === "1") return;
+      const nested = id === "romance" || id === "food" || id === "checklist";
+      const container = nested ? section.querySelector(":scope > .wrap") : section;
+      const title = container?.querySelector(":scope > .section-title");
+      if (!container || !title) return;
+      section.dataset.accordionReady = "1";
+      section.classList.add("collapsible-section", "section-collapsed", nested ? "accordion-nested" : "accordion-direct");
+      container.classList.add("accordion-container");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "section-toggle";
+      const heading = title.querySelector("h2")?.textContent?.trim() || "раздел";
+      const setExpanded = (expanded) => {
+        section.classList.toggle("section-collapsed", !expanded);
+        button.innerHTML = `${expanded ? "Свернуть" : "Открыть"} <span aria-hidden="true">+</span>`;
+        button.setAttribute("aria-expanded", String(expanded));
+        button.setAttribute("aria-label", `${expanded ? "Свернуть" : "Открыть"} раздел «${heading}»`);
+      };
+      setExpanded(false);
+      title.appendChild(button);
+      const toggle = () => setExpanded(section.classList.contains("section-collapsed"));
+      button.addEventListener("click", (event) => { event.stopPropagation(); toggle(); });
+      title.addEventListener("click", (event) => {
+        if (event.target.closest("button, a")) return;
+        toggle();
+      });
+      controls.set(id, { section, setExpanded });
+    });
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener("click", (event) => {
+        const id = link.hash.slice(1);
+        const control = controls.get(id);
+        if (!control) return;
+        event.preventDefault();
+        control.setExpanded(true);
+        history.replaceState(null, "", `#${id}`);
+        requestAnimationFrame(() => control.section.scrollIntoView({ behavior: "smooth", block: "start" }));
+      });
+    });
+    controls.get(location.hash.slice(1))?.setExpanded(true);
+  };
+
+  initSectionAccordions();
 
   const mikhail = document.querySelectorAll(".mikhail-card");
   if (mikhail[0]) bindDecision(mikhail[0], "mikhail:one");
