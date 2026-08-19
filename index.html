@@ -567,6 +567,11 @@
         button.innerHTML = `${expanded ? "Свернуть" : "Открыть"} <span aria-hidden="true">+</span>`;
         button.setAttribute("aria-expanded", String(expanded));
         button.setAttribute("aria-label", `${expanded ? "Свернуть" : "Открыть"} раздел «${heading}»`);
+        if (expanded && id === "map") {
+          requestAnimationFrame(() => requestAnimationFrame(() => {
+            window.__tripMap?.invalidateSize({ animate: false });
+          }));
+        }
       };
       setExpanded(false);
       title.appendChild(button);
@@ -657,6 +662,7 @@
     const node = document.getElementById("trip-map");
     if (!node || !window.L) return;
     const map = L.map(node, { scrollWheelZoom: false }).setView([59.934, 30.307], 13);
+    window.__tripMap = map;
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap" }).addTo(map);
     const add = (lat, lng, title, color, url, detail) => L.circleMarker([lat, lng], { radius: 8, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1 }).addTo(map).bindPopup(`<b>${title}</b><br>${detail}<br><a href="${url}" target="_blank" rel="noopener">Открыть ↗</a>`);
     data.houses.forEach((x) => add(x.lat, x.lng, x.name, "#9a5d56", x.url, x.priceText));
